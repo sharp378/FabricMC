@@ -1,0 +1,6 @@
+{
+  "pack": {
+    "pack_format": 26,
+    "description": "Stops the server automatically if no players are online"
+  }
+}
