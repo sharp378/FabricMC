@@ -20,7 +20,7 @@ FROM amazoncorretto:21-alpine-jdk as release
 LABEL org.opencontainers.image.name="Fabric Minecraft Server"
 LABEL org.opencontainers.image.authors="sharpscontainer"
 LABEL org.opencontainers.image.description="A simple Fabric server for Minecraft that self terminates"
-LABEL org.opencontainers.image.source="https://github.com/sharp378/PaperMC"
+LABEL org.opencontainers.image.source="https://github.com/sharp378/FabricMC"
 
 COPY --from=build --chmod=755 /tmp/server /tmp/server
 COPY --from=build --chmod=755 /tmp/mods /tmp/mods
