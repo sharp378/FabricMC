@@ -9,5 +9,5 @@ url=$(curl -G --data-urlencode 'loaders=["fabric"]' \
   --data-urlencode "game_versions=[\"${minecraft_version}\"]" \
   "https://api.modrinth.com/v2/project/${mod_name}/version" | jq '.[0].files[0].url')
 
-echo $url
+echo "${url//\"/}"
 
