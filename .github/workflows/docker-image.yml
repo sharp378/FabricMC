@@ -1,0 +1,105 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '25 4 * * *'
+  workflow_dispatch:
+
+jobs:
+
+  # if triggered by schedule, determine if a new release is needed. 
+  check-schedule:
+
+    runs-on: ubuntu-latest
+    
+    env:
+      MC_VERSION: 1.20.4
+      
+    outputs:
+      MC_VERSION: ${{ env.MC_VERSION }}
+      IMAGE_TAG: ${{ steps.set-env.outputs.IMAGE_TAG }}
+      FABRIC_URL: ${{ steps.set-env.outputs.FABRIC_URL }}
+
+    steps:
+      - uses: actions/checkout@v4 
+      
+      - name: check if triggered by schedule, set env
+        id: set-env
+        run: | 
+          fabric_latest_url=$(./get-fabric-latest.sh "${{ env.MC_VERSION }}")
+          fabric_latest_version=$(echo $fabric_latest_url | cut -d '/' -f 8)
+          
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            # check if new build should be created
+            latest_release_tag=$(echo $(curl -s "https://api.github.com/repos/sharp378/FabricMC/releases/latest" | jq -r '.tag_name'))
+            latest_release_fabric_version=$(echo $latest_release_tag | cut -d '-' -f 2)
+            if [ "$fabric_latest_version" == "$latest_release_fabric_version" ]; then
+              echo "No new Fabric MC builds at this time"
+              exit 0
+            fi
+          fi
+
+          echo "IMAGE_TAG=${{ env.MC_VERSION }}-${fabric_latest_version}" >> "$GITHUB_OUTPUT"
+          echo "FABRIC_URL=${fabric_latest_url}" >> "$GITHUB_OUTPUT"
+
+  build:
+    
+    needs: check-schedule
+
+    if: ${{ needs.check-schedule.outputs.IMAGE_TAG != '' }}
+  
+    runs-on: ubuntu-latest
+    
+    env:
+      DOCKERHUB_REPO: sharpscontainer/fabric-mc
+      MC_VERSION: ${{ needs.check-schedule.outputs.MC_VERSION }}
+      IMAGE_TAG: ${{ needs.check-schedule.outputs.IMAGE_TAG }}
+      FABRIC_URL: ${{ needs.check-schedule.outputs.FABRIC_URL }}
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Lithium Mod URL
+        id: lithium-url
+        run : |
+          lithium_url=$(./get-mod-latest-url.sh 'lithium' "${{ env.MC_VERSION }}")
+          echo "LITHIUM_URL=${lithium_url}" >> $GITHUB_OUTPUT
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          build-args: |
+            fabric_url=${{ env.FABRIC_URL }}
+            lithium_mod_url=${{ steps.lithium-url.outputs.LITHIUM_URL }}
+          target: release
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB_REPO }}:${{ env.IMAGE_TAG }}
+            ${{ env.DOCKERHUB_REPO }}:latest
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          commit: ${{ github.sha }}
+          tag: ${{ env.IMAGE_TAG }}
+          allowUpdates: true
+          
