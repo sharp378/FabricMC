@@ -5,8 +5,9 @@
 mod_name="$1"
 minecraft_version="$2"
 
-url=curl -G --data-urlencode 'loaders=["fabric"]' \
+url=$(curl -G --data-urlencode 'loaders=["fabric"]' \
   --data-urlencode "game_versions=[\"${minecraft_version}\"]" \
-  "https://api.modrinth.com/v2/project/${mod_name}/version" | jq -r ".[0].files[0].url"
+  "https://api.modrinth.com/v2/project/${mod_name}/version" | jq '.[0].files[0].url')
 
 echo $url
+
