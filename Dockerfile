@@ -36,6 +36,4 @@ USER fabric:fabric
 VOLUME /home/fabric
 EXPOSE 25565
 
-ENV SERVINATOR_INTERVAL=5
-
 ENTRYPOINT ["/tmp/server/start-server.sh"]
