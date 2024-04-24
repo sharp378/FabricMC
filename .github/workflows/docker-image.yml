@@ -14,11 +14,8 @@ jobs:
 
     runs-on: ubuntu-latest
     
-    env:
-      MC_VERSION: 1.20.5
-      
     outputs:
-      MC_VERSION: ${{ env.MC_VERSION }}
+      MC_VERSION: ${{ steps.set-env.outputs.MC_VERSION }} 
       IMAGE_TAG: ${{ steps.set-env.outputs.IMAGE_TAG }}
       FABRIC_URL: ${{ steps.set-env.outputs.FABRIC_URL }}
 
@@ -41,6 +38,8 @@ jobs:
             fi
           fi
 
+          mc_version=$(./get-minecraft-latest.sh)
+          echo "MC_VERSION=${mc_version}" >> "$GITHUB_OUTPUT"
           echo "IMAGE_TAG=${{ env.MC_VERSION }}-${fabric_latest_version}" >> "$GITHUB_OUTPUT"
           echo "FABRIC_URL=${fabric_latest_url}" >> "$GITHUB_OUTPUT"
 
