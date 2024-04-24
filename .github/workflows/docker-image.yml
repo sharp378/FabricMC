@@ -25,7 +25,8 @@ jobs:
       - name: check if triggered by schedule, set env
         id: set-env
         run: | 
-          fabric_latest_url=$(./get-fabric-latest.sh "${{ env.MC_VERSION }}")
+          mc_version=$(./get-minecraft-latest.sh)
+          fabric_latest_url=$(./get-fabric-latest.sh "$mc_version")
           fabric_latest_version=$(echo $fabric_latest_url | cut -d '/' -f 8)
           
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
@@ -38,7 +39,6 @@ jobs:
             fi
           fi
 
-          mc_version=$(./get-minecraft-latest.sh)
           echo "MC_VERSION=${mc_version}" >> "$GITHUB_OUTPUT"
           echo "IMAGE_TAG=${mc_version}-${fabric_latest_version}" >> "$GITHUB_OUTPUT"
           echo "FABRIC_URL=${fabric_latest_url}" >> "$GITHUB_OUTPUT"
