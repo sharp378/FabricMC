@@ -40,7 +40,7 @@ jobs:
 
           mc_version=$(./get-minecraft-latest.sh)
           echo "MC_VERSION=${mc_version}" >> "$GITHUB_OUTPUT"
-          echo "IMAGE_TAG=${{ env.MC_VERSION }}-${fabric_latest_version}" >> "$GITHUB_OUTPUT"
+          echo "IMAGE_TAG=${mc_version}-${fabric_latest_version}" >> "$GITHUB_OUTPUT"
           echo "FABRIC_URL=${fabric_latest_url}" >> "$GITHUB_OUTPUT"
 
   build:
