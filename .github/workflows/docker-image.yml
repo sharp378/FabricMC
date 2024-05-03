@@ -32,8 +32,9 @@ jobs:
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
             # check if new build should be created
             latest_release_tag=$(echo $(curl -s "https://api.github.com/repos/sharp378/FabricMC/releases/latest" | jq -r '.tag_name'))
+            latest_release_mc_version=$(echo $latest_release_tag | cut -d '-' -f 1)
             latest_release_fabric_version=$(echo $latest_release_tag | cut -d '-' -f 2)
-            if [ "$fabric_latest_version" == "$latest_release_fabric_version" ]; then
+            if [[ "$fabric_latest_version" == "$latest_release_fabric_version" && "$mc_version" == "$latest_release_mc_version" ]]; then
               echo "No new Fabric MC builds at this time"
               exit 0
             fi
