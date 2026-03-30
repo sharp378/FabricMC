@@ -15,7 +15,7 @@ ADD "$lithium_mod_url" ./lithium-fabric.jar
 WORKDIR /tmp/datapack
 COPY ./datapack/ ./servinator
 
-FROM amazoncorretto:21-alpine-jdk as release
+FROM amazoncorretto:25-alpine-jdk as release
 
 LABEL org.opencontainers.image.name="Fabric Minecraft Server"
 LABEL org.opencontainers.image.authors="sharpscontainer"
