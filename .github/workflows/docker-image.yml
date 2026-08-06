@@ -102,4 +102,5 @@ jobs:
           commit: ${{ github.sha }}
           tag: ${{ env.IMAGE_TAG }}
           allowUpdates: true
+          makeLatest: true
           
